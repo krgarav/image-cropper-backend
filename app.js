@@ -17,6 +17,8 @@ app.use(
     allowedHeaders: ["Content-Type", "Authorisation"], // Allow these headers
   })
 );
+// Serve static files from the build folder
+app.use(express.static(path.join(__dirname, 'build')));
 
 // Multer setup for file uploads
 const storage = multer.diskStorage({
@@ -25,7 +27,7 @@ const storage = multer.diskStorage({
     cb(null, "./uploads");
   },
   filename: function (req, file, cb) {
-    cb(null, file.originalname+".jpg");
+    cb(null, file.originalname + ".jpg");
   },
 });
 
@@ -37,20 +39,27 @@ app.post("/upload", upload.single("file"), (req, res) => {
 
   // Check if the user has specified a custom location
   const { customLocation } = req.body;
- 
+  console.log("location", req.body);
   let destinationFolder = "uploads/"; // Default destination folder
 
   if (customLocation) {
-    destinationFolder = path.join(__dirname, customLocation);
-    console.log(destinationFolder);
+    // Check if the custom location is an absolute path
+    if (path.isAbsolute(customLocation)) {
+      destinationFolder = customLocation;
+    } else {
+      // If it's a relative path, resolve it relative to the current working directory
+      destinationFolder = path.resolve(process.cwd(), customLocation);
+    }
+
     // Create the directory if it doesn't exist
     if (!fs.existsSync(destinationFolder)) {
       fs.mkdirSync(destinationFolder, { recursive: true });
     }
   }
 
+
   // Move the uploaded file to the specified destination folder
-  const destinationPath = path.join(destinationFolder, file.originalname);
+  const destinationPath = path.join(destinationFolder, file.originalname + ".jpg");
   fs.renameSync(file.path, destinationPath);
 
   res.send("File uploaded successfully");
