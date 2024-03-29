@@ -19,6 +19,8 @@ app.use(
 );
 // Serve static files from the build folder
 app.use(express.static(path.join(__dirname, 'build')));
+// Serve static files from the build folder
+app.use(express.static(path.join(__dirname, 'build')));
 
 // Multer setup for file uploads
 // const storage = multer.diskStorage({
@@ -93,6 +95,7 @@ app.post("/upload", upload.single("file"), (req, res) => {
 
     destinationFolder = folderPath;
   }
+
 
   // Move the uploaded file to the specified destination folder
   const file = req.file;
